@@ -8,6 +8,12 @@ on:
     branches:
       - main
 
+# Allow GitHub Actions to read the repository
+# and push Docker images to GHCR
+permissions:
+  contents: read
+  packages: write
+
 jobs:
   build:
     runs-on: ubuntu-latest
@@ -38,3 +44,40 @@ jobs:
 
       - name: Build frontend Docker image
         run: docker build -t taskflow-frontend ./frontend
+
+      # Login to GitHub Container Registry
+      - name: Login to GHCR
+        if: github.event_name == 'push'
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      # Tag backend image
+      - name: Tag backend image
+        if: github.event_name == 'push'
+        run: |
+          docker tag taskflow-backend ghcr.io/${{ github.repository_owner }}/taskflow-backend:latest
+          docker tag taskflow-backend ghcr.io/${{ github.repository_owner }}/taskflow-backend:${{ github.sha }}
+
+      # Tag frontend image
+      - name: Tag frontend image
+        if: github.event_name == 'push'
+        run: |
+          docker tag taskflow-frontend ghcr.io/${{ github.repository_owner }}/taskflow-frontend:latest
+          docker tag taskflow-frontend ghcr.io/${{ github.repository_owner }}/taskflow-frontend:${{ github.sha }}
+
+      # Push backend image
+      - name: Push backend image
+        if: github.event_name == 'push'
+        run: |
+          docker push ghcr.io/${{ github.repository_owner }}/taskflow-backend:latest
+          docker push ghcr.io/${{ github.repository_owner }}/taskflow-backend:${{ github.sha }}
+
+      # Push frontend image
+      - name: Push frontend image
+        if: github.event_name == 'push'
+        run: |
+          docker push ghcr.io/${{ github.repository_owner }}/taskflow-frontend:latest
+          docker push ghcr.io/${{ github.repository_owner }}/taskflow-frontend:${{ github.sha }}
