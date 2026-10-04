@@ -12,6 +12,6 @@ CREATE TABLE IF NOT EXISTS tasks (
     description TEXT,
     priority VARCHAR(20) DEFAULT 'MEDIUM',
     status VARCHAR(20) DEFAULT 'PENDING',
-    user_id INTEGER,
+    user_id INTEGER REFERENCES users(id) ON DELETE CASCADE,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );

@@ -5,6 +5,7 @@ import API from "../services/api";
 function Dashboard() {
   const navigate = useNavigate();
   const [tasks, setTasks] = useState([]);
+  const [filter, setFilter] = useState("ALL");
   const [message, setMessage] = useState("");
 
   const [darkMode, setDarkMode] = useState(
@@ -26,6 +27,29 @@ function Dashboard() {
   });
 
   const [editingTask, setEditingTask] = useState(null);
+
+  const totalTasks = tasks.length;
+
+  const completedTasks = tasks.filter(
+    (task) => task.status === "COMPLETED"
+    ).length;
+
+  const pendingTasks = tasks.filter(
+    (task) => task.status !== "COMPLETED"
+    ).length;
+  
+
+  const filteredTasks = tasks.filter((task) => {
+      if (filter === "COMPLETED") {
+        return task.status === "COMPLETED";
+      }
+
+      if (filter === "PENDING") {
+        return task.status !== "COMPLETED";
+      }
+
+      return true;
+    });
 
   const fetchTasks = async () => {
     try {
@@ -314,6 +338,50 @@ function Dashboard() {
 
         </section>
 
+        <div className="task-stats">
+
+          <div className="stat-card">
+            <h3>Total</h3>
+            <p>{totalTasks}</p>
+          </div>
+
+          <div className="stat-card">
+            <h3>Pending</h3>
+            <p>{pendingTasks}</p>
+          </div>
+
+          <div className="stat-card">
+            <h3>Completed</h3>
+            <p>{completedTasks}</p>
+          </div>
+
+        </div>
+
+        <div className="task-filters">
+
+          <button
+            className={filter === "ALL" ? "active-filter" : ""}
+            onClick={() => setFilter("ALL")}
+          >     
+            All
+          </button>
+
+          <button
+            className={filter === "PENDING" ? "active-filter" : ""}
+            onClick={() => setFilter("PENDING")}
+          >
+            Pending
+          </button>
+
+          <button
+            className={filter === "COMPLETED" ? "active-filter" : ""}
+            onClick={() => setFilter("COMPLETED")}
+          >
+            Completed
+          </button>
+
+        </div>
+
         {/* TASK LIST */}
         <section className="tasks-section">
 
@@ -338,7 +406,7 @@ function Dashboard() {
 
             <div className="task-grid">
 
-              {tasks.map((task) => (
+              {filteredTasks.map((task) => (
 
                 <div
                   className="task-card"
